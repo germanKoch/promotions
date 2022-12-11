@@ -4,4 +4,7 @@
 -> connection pool
 -> horizontal scalling capabilyty
 -> service depends on orm?
+-> exceptions handling
+-> pointers
 -> db isolation
+-> db migrations
