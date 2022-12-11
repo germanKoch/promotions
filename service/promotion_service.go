@@ -11,7 +11,7 @@ type PromotionService struct {
 	repository PromotionRepository
 }
 
-func PromotionRepoService(repo PromotionRepository) PromotionService {
+func GetPromotionRepoService(repo PromotionRepository) PromotionService {
 	return PromotionService{
 		repository: repo,
 	}
@@ -21,6 +21,6 @@ func (s PromotionService) GetById(id uint) model.Promotion {
 	return s.repository.GetById(id)
 }
 
-func (s PromotionService) save(promotion model.Promotion) {
+func (s PromotionService) Save(promotion model.Promotion) {
 	s.repository.Save(promotion)
 }

@@ -5,6 +5,8 @@
 -> horizontal scalling capabilyty
 -> service depends on orm?
 -> exceptions handling
+-> capling between model and db
 -> pointers
 -> db isolation
 -> db migrations
+-> add gitignore
