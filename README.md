@@ -1,0 +1,7 @@
+-> interfaces implementions injection
+-> private public vars
+-> throwing exceptions
+-> connection pool
+-> horizontal scalling capabilyty
+-> service depends on orm?
+-> db isolation
