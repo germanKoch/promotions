@@ -12,6 +12,7 @@ type PromotionRepository struct {
 	db gorm.DB
 }
 
+// TODO: url config
 func GetPromotionRepositoryPostgres() PromotionRepository {
 	db, err := gorm.Open(postgres.Open("host=localhost user=postgres password=postgres dbname=promotion port=5432"), &gorm.Config{})
 	if err != nil {

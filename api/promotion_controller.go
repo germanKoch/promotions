@@ -8,10 +8,10 @@ import (
 )
 
 type Promotion struct {
-	Id             uint
-	ExternalId     string
-	Price          float32
-	ExpirationDate time.Time
+	Id             uint      `json:"id"`
+	ExternalId     string    `json:"externalId"`
+	Price          float32   `json:"price"`
+	ExpirationDate time.Time `json:"expirationDate"`
 }
 
 type PromotionService interface {
@@ -38,12 +38,12 @@ func GetPromotionController(service PromotionService) PromotionController {
 }
 
 func (cont PromotionController) GetUser(c *fiber.Ctx) error {
-	id, err := c.ParamsInt("id")
+	id, _ := c.ParamsInt("id")
 	user := cont.service.GetById(uint(id))
 	resource := mapToResource(user)
 	return c.Status(200).JSON(resource)
 }
 
-func (cont PromotionController) GetRouters(app *fiber.App) {
-	app.Get("/api/users/:id", cont.GetUser)
+func (cont PromotionController) GetRouts(app *fiber.App) {
+	app.Get("/promotions/:id", cont.GetUser)
 }

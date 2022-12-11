@@ -10,3 +10,4 @@
 -> db isolation
 -> db migrations
 -> add gitignore
+-> job config

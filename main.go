@@ -13,7 +13,11 @@ func main() {
 
 	repo := repository.GetPromotionRepositoryPostgres()
 	promotionService := service.GetPromotionRepoService(repo)
+	scheduler := service.GetScheduledReader(promotionService)
 	promotionController := api.GetPromotionController(promotionService)
+
+	promotionController.GetRouts(app)
+	scheduler.ScheduleJob()
 
 	app.Listen(":3000")
 }

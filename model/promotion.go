@@ -10,3 +10,7 @@ type Promotion struct {
 	Price          float32
 	ExpirationDate time.Time
 }
+
+func (Promotion) TableName() string {
+	return "promotion"
+}
