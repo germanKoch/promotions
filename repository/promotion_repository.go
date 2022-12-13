@@ -26,6 +26,6 @@ func (repo PromotionRepository) GetById(id string) model.Promotion {
 func (repo PromotionRepository) UpsertAll(promotions []model.Promotion) {
 	repo.db.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "id"}},
-		DoUpdates: clause.AssignmentColumns([]string{"price", "expiration_date"}), //<-- How update 1->juan, 2->jhon
+		DoUpdates: clause.AssignmentColumns([]string{"price", "expiration_date"}),
 	}).Create(&promotions)
 }

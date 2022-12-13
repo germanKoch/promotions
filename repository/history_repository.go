@@ -2,6 +2,7 @@ package repository
 
 import (
 	"promotions/model"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -10,19 +11,18 @@ type HistoryRepository struct {
 	db gorm.DB
 }
 
-// TODO: url config
 func GetHistoryRepository(db gorm.DB) PromotionRepository {
 	return PromotionRepository{
 		db: db,
 	}
 }
 
-func (repo HistoryRepository) GetById(id uint) model.Promotion {
-	var promotion model.Promotion
-	repo.db.Find(&promotion, id)
-	return promotion
+func (repo HistoryRepository) GetAfter(processedAfter time.Time) []model.ProcessedFile {
+	var processedFiles []model.ProcessedFile
+	repo.db.Where("processing_date > ?", processedAfter).Find(&processedFiles)
+	return processedFiles
 }
 
-func (repo HistoryRepository) Save(promotion model.Promotion) {
-	repo.db.Create(&promotion)
+func (repo HistoryRepository) Save(processedFile model.ProcessedFile) {
+	repo.db.Create(&processedFile)
 }

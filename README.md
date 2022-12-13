@@ -1,16 +1,9 @@
--> interfaces implementions injection
--> private public vars
 -> throwing exceptions
--> connection pool
 -> horizontal scalling capabilyty
--> service depends on orm?
--> exceptions handling
 -> capling between model and db
--> pointers
 -> db isolation
 -> db migrations
 -> status hostory
--> add gitignore
 -> job config
 -> find unfinished parsings
 -> modify date
@@ -19,3 +12,4 @@
 
 Questions:
 -> does duck typing work in compile time?
+-> pointers
