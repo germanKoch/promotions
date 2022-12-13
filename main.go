@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"promotions/service/storage"
+	"promotions/service/parser"
 	// "promotions/api"
 	// "promotions/config"
 	// "promotions/repository"
@@ -11,14 +11,8 @@ import (
 )
 
 func main() {
-	stor := storage.GetLocalStorage("C:\\Users\\germi\\Desktop\\test_data")
-	stor.Walk(func(file storage.FileData) {
-		liner := file.Content()
-		for i := 0; liner.HasNext(); i++ {
-			s := liner.NextLine()
-			fmt.Println(s)
-		}
-	})
+	p := parser.PromotionParser("d018ef0b-dbd9-48f1-ac1a-eb4d90e57118,60.683466,2018-08-04 05:32:31 +0200 CEST")
+	fmt.Print(p)
 	// app := fiber.New()
 	// db := config.GetDb()
 

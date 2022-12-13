@@ -10,7 +10,7 @@ import (
 type Promotion struct {
 	Id             uint      `json:"id"`
 	ExternalId     string    `json:"externalId"`
-	Price          float32   `json:"price"`
+	Price          float64   `json:"price"`
 	ExpirationDate time.Time `json:"expirationDate"`
 }
 
