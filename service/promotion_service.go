@@ -3,8 +3,8 @@ package service
 import "promotions/model"
 
 type PromotionRepository interface {
-	GetById(Id uint) model.Promotion
-	Save(model.Promotion)
+	GetById(Id string) model.Promotion
+	UpsertAll(promotions []model.Promotion)
 }
 
 type PromotionService struct {
@@ -17,10 +17,10 @@ func GetPromotionRepoService(repo PromotionRepository) PromotionService {
 	}
 }
 
-func (s PromotionService) GetById(id uint) model.Promotion {
+func (s PromotionService) GetById(id string) model.Promotion {
 	return s.repository.GetById(id)
 }
 
-func (s PromotionService) Save(promotion model.Promotion) {
-	s.repository.Save(promotion)
+func (s PromotionService) UpsertAll(promotions []model.Promotion) {
+	s.repository.UpsertAll(promotions)
 }

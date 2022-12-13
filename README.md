@@ -9,6 +9,7 @@
 -> pointers
 -> db isolation
 -> db migrations
+-> status hostory
 -> add gitignore
 -> job config
 -> find unfinished parsings

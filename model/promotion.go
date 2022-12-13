@@ -5,8 +5,7 @@ import (
 )
 
 type Promotion struct {
-	Id             uint
-	ExternalId     string
+	Id             string
 	Price          float64
 	ExpirationDate time.Time
 }
