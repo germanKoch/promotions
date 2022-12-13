@@ -6,23 +6,23 @@ import (
 	"gorm.io/gorm"
 )
 
-type PromotionRepository struct {
+type HistoryRepository struct {
 	db gorm.DB
 }
 
 // TODO: url config
-func GetPromotionRepository(db gorm.DB) PromotionRepository {
+func GetHistoryRepository(db gorm.DB) PromotionRepository {
 	return PromotionRepository{
 		db: db,
 	}
 }
 
-func (repo PromotionRepository) GetById(id uint) model.Promotion {
+func (repo HistoryRepository) GetById(id uint) model.Promotion {
 	var promotion model.Promotion
 	repo.db.Find(&promotion, id)
 	return promotion
 }
 
-func (repo PromotionRepository) Save(promotion model.Promotion) {
+func (repo HistoryRepository) Save(promotion model.Promotion) {
 	repo.db.Create(&promotion)
 }

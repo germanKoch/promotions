@@ -11,3 +11,10 @@
 -> db migrations
 -> add gitignore
 -> job config
+-> find unfinished parsings
+-> modify date
+-> interfaces should be exposed but not required
+-> maybe we should separate interfaces and emplementations
+
+Questions:
+-> does duck typing work in compile time?
