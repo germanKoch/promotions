@@ -11,8 +11,8 @@ type HistoryRepository struct {
 	db gorm.DB
 }
 
-func GetHistoryRepository(db gorm.DB) PromotionRepository {
-	return PromotionRepository{
+func GetHistoryRepository(db gorm.DB) HistoryRepository {
+	return HistoryRepository{
 		db: db,
 	}
 }

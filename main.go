@@ -5,6 +5,7 @@ import (
 	"promotions/config"
 	"promotions/repository"
 	"promotions/service"
+	"promotions/service/parser"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -15,7 +16,10 @@ func main() {
 
 	repo := repository.GetPromotionRepository(db)
 	promotionService := service.GetPromotionRepoService(repo)
-	scheduler := service.GetScheduledReader(promotionService)
+	historyRepository := repository.GetHistoryRepository(db)
+	promotionParser := parser.GetPromotionParser()
+
+	scheduler := service.GetScheduledReader(promotionService, historyRepository, promotionParser)
 	promotionController := api.GetPromotionController(promotionService)
 
 	promotionController.GetRouts(app)

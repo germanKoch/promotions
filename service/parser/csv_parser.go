@@ -7,7 +7,13 @@ import (
 	"time"
 )
 
-func PromotionParser(csvString string) model.Promotion {
+type PromotionParser struct{}
+
+func GetPromotionParser() PromotionParser {
+	return PromotionParser{}
+}
+
+func (PromotionParser) Parse(csvString string) model.Promotion {
 	fields := strings.Split(csvString, ",")
 	//TODO: error handling
 	//TODO: timezone
@@ -15,8 +21,7 @@ func PromotionParser(csvString string) model.Promotion {
 	expirationDate, _ := time.Parse("2006-01-02 15:04:05 +0200 CEST", fields[2])
 
 	return model.Promotion{
-		Id:             0,
-		ExternalId:     fields[0],
+		Id:             fields[0],
 		Price:          price,
 		ExpirationDate: expirationDate,
 	}
