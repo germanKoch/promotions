@@ -1,6 +1,7 @@
 package config
 
 import (
+	"promotions/model"
 	"time"
 
 	"gorm.io/driver/postgres"
@@ -13,6 +14,7 @@ func GetDb() gorm.DB {
 		// control error
 	}
 
+	db.AutoMigrate(&model.Promotion{}, &model.ProcessedFile{})
 	dbExec, err := db.DB()
 	if err != nil {
 		// control error

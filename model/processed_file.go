@@ -5,7 +5,7 @@ import (
 )
 
 type ProcessedFile struct {
-	Id             uint
+	Id             uint `gorm:"primaryKey"`
 	Path           string
 	ProcessingDate time.Time
 }

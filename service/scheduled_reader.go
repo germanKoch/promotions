@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"log"
 	"promotions/model"
 	"promotions/service/storage"
 	"time"
@@ -34,9 +33,10 @@ type ScheduledReader struct {
 	promotionParser PromotionParser
 }
 
-func GetScheduledReader(saver PromotionProcessor, history HistoryProcessor, promotionParser PromotionParser) ScheduledReader {
+func GetScheduledReader(saver PromotionProcessor, history HistoryProcessor, promotionParser PromotionParser, storage Storage) ScheduledReader {
 	return ScheduledReader{
 		promotions:      saver,
+		storage:         storage,
 		history:         history,
 		promotionParser: promotionParser,
 	}
@@ -46,11 +46,11 @@ func GetScheduledReader(saver PromotionProcessor, history HistoryProcessor, prom
 func (reader ScheduledReader) ScheduleJob() {
 	taskScheduler := chrono.NewDefaultTaskScheduler()
 	taskScheduler.ScheduleWithFixedDelay(func(ctx context.Context) {
-		log.Print("One-Shot Task")
-	}, 10000)
+		reader.importPromotions()
+	}, 100000)
 }
 
-func (reader ScheduledReader) ImportPromotions() {
+func (reader ScheduledReader) importPromotions() {
 	daysBefore := 7
 	batchSize := 100
 
@@ -65,7 +65,8 @@ func (reader ScheduledReader) ImportPromotions() {
 	}
 
 	reader.storage.Walk(func(file storage.FileData) {
-		if file.ModificationDate().UTC().After(timeAfter) {
+		modificationDate := file.ModificationDate().UTC()
+		if modificationDate.After(timeAfter) {
 			_, exists := pathToProcessedFile[file.Path()]
 			if !exists {
 				reader.importSingleFile(file, batchSize)
@@ -75,14 +76,23 @@ func (reader ScheduledReader) ImportPromotions() {
 }
 
 func (reader ScheduledReader) importSingleFile(file storage.FileData, batchSize int) {
-	batch := make([]model.Promotion, batchSize)
 	liner := file.Content()
 
 	for i := 0; liner.HasNext(); i++ {
-		for j := 0; j < batchSize && liner.HasNext(); j++ {
-			batch[j] = reader.promotionParser.Parse(liner.NextLine())
+		batchPointer := 0
+		batch := make([]model.Promotion, batchSize)
+
+		for j := 0; batchPointer < batchSize && liner.HasNext(); j++ {
+			line := liner.NextLine()
+			if len(line) > 0 {
+				//TODO error processing
+				batch[batchPointer] = reader.promotionParser.Parse(line)
+				batchPointer += 1
+			}
 		}
-		reader.promotions.UpsertAll(batch)
+		if len(batch) != 0 {
+			reader.promotions.UpsertAll(batch)
+		}
 	}
 
 	reader.history.Save(

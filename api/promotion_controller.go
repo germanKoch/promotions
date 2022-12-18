@@ -2,6 +2,7 @@ package api
 
 import (
 	"promotions/model"
+	"promotions/model/bussiness_error"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -14,7 +15,7 @@ type Promotion struct {
 }
 
 type PromotionService interface {
-	GetById(Id string) model.Promotion
+	GetById(Id string) (model.Promotion, error)
 }
 
 type PromotionController struct {
@@ -35,13 +36,16 @@ func GetPromotionController(service PromotionService) PromotionController {
 	}
 }
 
-func (cont PromotionController) GetUser(c *fiber.Ctx) error {
+func (cont PromotionController) GetPromotion(c *fiber.Ctx) error {
 	id := c.Params("id")
-	user := cont.service.GetById(id)
-	resource := mapToResource(user)
+	promotion, err := cont.service.GetById(id)
+	if err == bussiness_error.ErrNotFound {
+		return c.Status(404).JSON(err)
+	}
+	resource := mapToResource(promotion)
 	return c.Status(200).JSON(resource)
 }
 
 func (cont PromotionController) GetRouts(app *fiber.App) {
-	app.Get("/promotions/:id", cont.GetUser)
+	app.Get("/promotions/:id", cont.GetPromotion)
 }

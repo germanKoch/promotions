@@ -2,6 +2,7 @@ package repository
 
 import (
 	"promotions/model"
+	"promotions/model/bussiness_error"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -17,10 +18,13 @@ func GetPromotionRepository(db gorm.DB) PromotionRepository {
 	}
 }
 
-func (repo PromotionRepository) GetById(id string) model.Promotion {
+func (repo PromotionRepository) GetById(id string) (model.Promotion, error) {
 	var promotion model.Promotion
-	repo.db.Find(&promotion, id)
-	return promotion
+	err := repo.db.First(&promotion, "id = ?", id).Error
+	if err == gorm.ErrRecordNotFound {
+		return promotion, bussiness_error.ErrNotFound
+	}
+	return promotion, nil
 }
 
 func (repo PromotionRepository) UpsertAll(promotions []model.Promotion) {

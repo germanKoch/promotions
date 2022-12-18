@@ -6,6 +6,7 @@ import (
 	"promotions/repository"
 	"promotions/service"
 	"promotions/service/parser"
+	"promotions/service/storage"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -14,12 +15,13 @@ func main() {
 	app := fiber.New()
 	db := config.GetDb()
 
+	storage := storage.GetLocalStorage("C:\\Users\\germi\\Desktop\\import")
 	repo := repository.GetPromotionRepository(db)
 	promotionService := service.GetPromotionRepoService(repo)
 	historyRepository := repository.GetHistoryRepository(db)
 	promotionParser := parser.GetPromotionParser()
 
-	scheduler := service.GetScheduledReader(promotionService, historyRepository, promotionParser)
+	scheduler := service.GetScheduledReader(promotionService, historyRepository, promotionParser, storage)
 	promotionController := api.GetPromotionController(promotionService)
 
 	promotionController.GetRouts(app)

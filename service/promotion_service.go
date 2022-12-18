@@ -3,7 +3,7 @@ package service
 import "promotions/model"
 
 type PromotionRepository interface {
-	GetById(Id string) model.Promotion
+	GetById(Id string) (model.Promotion, error)
 	UpsertAll(promotions []model.Promotion)
 }
 
@@ -17,7 +17,7 @@ func GetPromotionRepoService(repo PromotionRepository) PromotionService {
 	}
 }
 
-func (s PromotionService) GetById(id string) model.Promotion {
+func (s PromotionService) GetById(id string) (model.Promotion, error) {
 	return s.repository.GetById(id)
 }
 

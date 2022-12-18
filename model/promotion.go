@@ -5,7 +5,7 @@ import (
 )
 
 type Promotion struct {
-	Id             string
+	Id             string `gorm:"primaryKey"`
 	Price          float64
 	ExpirationDate time.Time
 }
