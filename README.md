@@ -1,5 +1,6 @@
 -> throwing exceptions
 -> horizontal scalling capabilyty
+-> timezone in db
 -> capling between model and db
 -> db isolation
 -> db migrations //replace gorm to sql

@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"math"
+	"promotions/config"
 	"promotions/model"
 	"promotions/service/storage"
 	"time"
@@ -27,14 +29,16 @@ type Storage interface {
 }
 
 type ScheduledReader struct {
+	config          config.SchedulerConfig
 	promotions      PromotionProcessor
 	history         HistoryProcessor
 	storage         Storage
 	promotionParser PromotionParser
 }
 
-func GetScheduledReader(saver PromotionProcessor, history HistoryProcessor, promotionParser PromotionParser, storage Storage) ScheduledReader {
+func GetScheduledReader(schedulerConfig config.SchedulerConfig, saver PromotionProcessor, history HistoryProcessor, promotionParser PromotionParser, storage Storage) ScheduledReader {
 	return ScheduledReader{
+		config:          schedulerConfig,
 		promotions:      saver,
 		storage:         storage,
 		history:         history,
@@ -42,17 +46,16 @@ func GetScheduledReader(saver PromotionProcessor, history HistoryProcessor, prom
 	}
 }
 
-// TODO: job config
 func (reader ScheduledReader) ScheduleJob() {
 	taskScheduler := chrono.NewDefaultTaskScheduler()
 	taskScheduler.ScheduleWithFixedDelay(func(ctx context.Context) {
 		reader.importPromotions()
-	}, 100000)
+	}, time.Duration(reader.config.Period*int64(math.Pow(10, 6))))
 }
 
 func (reader ScheduledReader) importPromotions() {
-	daysBefore := 7
-	batchSize := 100
+	daysBefore := reader.config.DaysDelta
+	batchSize := reader.config.BatchSize
 
 	now := time.Now().UTC()
 	timeAfter := now.AddDate(0, 0, -daysBefore)
@@ -77,22 +80,26 @@ func (reader ScheduledReader) importPromotions() {
 
 func (reader ScheduledReader) importSingleFile(file storage.FileData, batchSize int) {
 	liner := file.Content()
+	batchPointer := 0
+	batch := make([]model.Promotion, batchSize)
 
-	for i := 0; liner.HasNext(); i++ {
-		batchPointer := 0
-		batch := make([]model.Promotion, batchSize)
+	for i := 0; liner.ReadNext(); i++ {
+		line := liner.NextLine()
 
-		for j := 0; batchPointer < batchSize && liner.HasNext(); j++ {
-			line := liner.NextLine()
-			if len(line) > 0 {
-				//TODO error processing
-				batch[batchPointer] = reader.promotionParser.Parse(line)
-				batchPointer += 1
-			}
+		if len(line) > 0 {
+			batch[batchPointer] = reader.promotionParser.Parse(line)
+			batchPointer += 1
 		}
-		if len(batch) != 0 {
+
+		if batchPointer > 0 && batchPointer%batchSize == 0 {
 			reader.promotions.UpsertAll(batch)
+			batchPointer = 0
+			batch = make([]model.Promotion, batchSize)
 		}
+	}
+
+	if batchPointer != 0 {
+		reader.promotions.UpsertAll(batch[:batchPointer])
 	}
 
 	reader.history.Save(

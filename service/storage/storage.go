@@ -3,13 +3,13 @@ package storage
 import (
 	"bufio"
 	"os"
-
 	"path/filepath"
+	"promotions/config"
 	"time"
 )
 
 type FileLiner interface {
-	HasNext() bool
+	ReadNext() bool
 	NextLine() string
 	Close() error
 }
@@ -38,7 +38,7 @@ type LocalStorage struct {
 	monitoredDirectory string
 }
 
-func (fileLiner LocalFileLiner) HasNext() bool {
+func (fileLiner LocalFileLiner) ReadNext() bool {
 	return fileLiner.scanner.Scan()
 }
 
@@ -71,9 +71,9 @@ func (fileData LocalFileData) Content() FileLiner {
 	}
 }
 
-func GetLocalStorage(monitoredDirectory string) Storage {
+func GetLocalStorage(localStorageConfig config.LocalStorageConfig) Storage {
 	return LocalStorage{
-		monitoredDirectory: monitoredDirectory,
+		monitoredDirectory: localStorageConfig.MonitoredDirectory,
 	}
 }
 
