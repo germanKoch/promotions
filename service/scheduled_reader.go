@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"log"
 	"math"
 	"promotions/config"
 	"promotions/model"
@@ -16,7 +17,7 @@ type PromotionProcessor interface {
 }
 
 type PromotionParser interface {
-	Parse(csvString string) model.Promotion
+	Parse(csvString string) (model.Promotion, error)
 }
 
 type HistoryProcessor interface {
@@ -58,7 +59,7 @@ func (reader ScheduledReader) importPromotions() {
 	batchSize := reader.config.BatchSize
 
 	now := time.Now().UTC()
-	timeAfter := now.AddDate(0, 0, -daysBefore)
+	timeAfter := now.AddDate(0, 0, -daysBefore-1)
 
 	importedFiles := reader.history.GetAfter(timeAfter)
 	pathToProcessedFile := make(map[string]model.ProcessedFile)
@@ -87,8 +88,13 @@ func (reader ScheduledReader) importSingleFile(file storage.FileData, batchSize 
 		line := liner.NextLine()
 
 		if len(line) > 0 {
-			batch[batchPointer] = reader.promotionParser.Parse(line)
-			batchPointer += 1
+			promotion, err := reader.promotionParser.Parse(line)
+			if err == nil {
+				batch[batchPointer] = promotion
+				batchPointer += 1
+			} else {
+				log.Printf("line [%s] could not be parsed. Error: %s", line, err.Error())
+			}
 		}
 
 		if batchPointer > 0 && batchPointer%batchSize == 0 {
