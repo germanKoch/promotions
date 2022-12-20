@@ -1,27 +1,21 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
-	"os"
 	"promotions/api"
 	"promotions/config"
 	"promotions/database"
 	"promotions/repository"
 	"promotions/service"
 	"promotions/service/parser"
-	"promotions/service/storage"
+	"promotions/storage"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
-	cfgPath, configErr := parseFlags()
-	if configErr != nil {
-		log.Fatal(configErr)
-		panic("Config params undefined")
-	}
+	cfgPath := "./config.yml"
 	cfg, configErr := config.NewConfig(cfgPath)
 	if configErr != nil {
 		log.Fatal(configErr)
@@ -49,27 +43,4 @@ func main() {
 		panic("Could not lanch server")
 	}
 
-}
-
-func parseFlags() (string, error) {
-	var configPath string
-	flag.StringVar(&configPath, "config", "./config.yml", "path to config file")
-
-	flag.Parse()
-	if err := validateConfigPath(configPath); err != nil {
-		return "", err
-	}
-
-	return configPath, nil
-}
-
-func validateConfigPath(path string) error {
-	s, err := os.Stat(path)
-	if err != nil {
-		return err
-	}
-	if s.IsDir() {
-		return fmt.Errorf("'%s' is a directory, not a normal file", path)
-	}
-	return nil
 }

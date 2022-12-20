@@ -6,7 +6,6 @@ import (
 	"math"
 	"promotions/config"
 	"promotions/model"
-	"promotions/service/storage"
 	"time"
 
 	"github.com/procyon-projects/chrono"
@@ -26,7 +25,7 @@ type HistoryProcessor interface {
 }
 
 type Storage interface {
-	Walk(process func(file storage.FileData))
+	Walk(process func(file model.FileData))
 }
 
 type ScheduledReader struct {
@@ -68,7 +67,7 @@ func (reader ScheduledReader) importPromotions() {
 		pathToProcessedFile[importedFiles[i].Path] = importedFiles[i]
 	}
 
-	reader.storage.Walk(func(file storage.FileData) {
+	reader.storage.Walk(func(file model.FileData) {
 		modificationDate := file.ModificationDate().UTC()
 		if modificationDate.After(timeAfter) {
 			_, exists := pathToProcessedFile[file.Path()]
@@ -79,8 +78,27 @@ func (reader ScheduledReader) importPromotions() {
 	})
 }
 
-func (reader ScheduledReader) importSingleFile(file storage.FileData, batchSize int) {
-	liner := file.Content()
+func (reader ScheduledReader) importSingleFile(file model.FileData, batchSize int) {
+	log.Printf("importing %s file", file.Path())
+
+	liner, err := file.Content()
+	if err != nil {
+		log.Printf("File [%s] could not be imported. Error: %s", file.Path(), err.Error())
+		return
+	}
+	defer liner.Close()
+
+	reader.importFileContent(liner, batchSize)
+
+	reader.history.Save(
+		model.ProcessedFile{
+			Path:           file.Path(),
+			ProcessingDate: time.Now().UTC(),
+		},
+	)
+}
+
+func (reader ScheduledReader) importFileContent(liner model.FileLiner, batchSize int) {
 	batchPointer := 0
 	batch := make([]model.Promotion, batchSize)
 
@@ -107,13 +125,4 @@ func (reader ScheduledReader) importSingleFile(file storage.FileData, batchSize 
 	if batchPointer != 0 {
 		reader.promotions.UpsertAll(batch[:batchPointer])
 	}
-
-	reader.history.Save(
-		model.ProcessedFile{
-			Path:           file.Path(),
-			ProcessingDate: time.Now().UTC(),
-		},
-	)
-
-	defer liner.Close()
 }

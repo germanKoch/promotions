@@ -5,24 +5,9 @@ import (
 	"os"
 	"path/filepath"
 	"promotions/config"
+	"promotions/model"
 	"time"
 )
-
-type FileLiner interface {
-	ReadNext() bool
-	NextLine() string
-	Close() error
-}
-
-type FileData interface {
-	Path() string
-	ModificationDate() time.Time
-	Content() FileLiner
-}
-
-type Storage interface {
-	Walk(process func(file FileData))
-}
 
 type LocalFileLiner struct {
 	file    *os.File
@@ -59,25 +44,25 @@ func (fileData LocalFileData) ModificationDate() time.Time {
 	return fileData.file.ModTime()
 }
 
-func (fileData LocalFileData) Content() FileLiner {
+func (fileData LocalFileData) Content() (model.FileLiner, error) {
 	file, err := os.Open(fileData.path)
 	if err != nil {
-		//TODO: error handling
+		return LocalFileLiner{}, err
 	}
 	scanner := bufio.NewScanner(file)
 	return LocalFileLiner{
 		file:    file,
 		scanner: scanner,
-	}
+	}, nil
 }
 
-func GetLocalStorage(localStorageConfig config.LocalStorageConfig) Storage {
+func GetLocalStorage(localStorageConfig config.LocalStorageConfig) model.Storage {
 	return LocalStorage{
 		monitoredDirectory: localStorageConfig.MonitoredDirectory,
 	}
 }
 
-func (storage LocalStorage) Walk(process func(fileData FileData)) {
+func (storage LocalStorage) Walk(process func(fileData model.FileData)) {
 	filepath.Walk(storage.monitoredDirectory, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
 			process(
